@@ -394,10 +394,10 @@ app.delete('/api/upload/:filename', authMiddleware, (req, res) => {
   }
 });
 // Health check
-/*app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public")));
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
-});*/
+});
 
 const Episode = require('./models/Episode');
 
