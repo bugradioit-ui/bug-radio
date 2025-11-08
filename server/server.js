@@ -394,9 +394,10 @@ app.delete('/api/upload/:filename', authMiddleware, (req, res) => {
   }
 });
 // Health check
-app.get('/', (req, res) => {
-  res.json({ message: 'BUG Radio API', status: 'ok' });
-});
+/*app.use(express.static(path.join(__dirname, "public")));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});*/
 
 const Episode = require('./models/Episode');
 
@@ -552,6 +553,7 @@ app.get('/api/public/shows/:showSlug/episodes', async (req, res) => {
     res.status(500).json({ error: 'Errore nel recupero degli episodi' });
   }
 });
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server in esecuzione sulla porta ${PORT}`);

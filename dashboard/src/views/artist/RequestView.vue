@@ -198,9 +198,9 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useArtistStore } from '../stores/artist'
+import { useArtistStore } from '@/stores/artist'
 import { useToast } from 'primevue/usetoast'
-import ImageUpload from '../components/ImageUpload.vue'
+import ImageUpload from '@/components/ImageUpload.vue'
 
 const router = useRouter()
 const artistStore = useArtistStore()
