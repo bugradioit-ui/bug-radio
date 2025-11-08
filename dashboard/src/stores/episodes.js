@@ -5,29 +5,43 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
 export const useEpisodesStore = defineStore('episodes', {
     state: () => ({
-        episodes: [],
+        episodes: [],  // ✅ CRITICO: deve essere array vuoto
         currentEpisode: null,
         loading: false,
         error: null
     }),
 
     getters: {
-        publishedEpisodes: (state) => state.episodes.filter(e => e.status === 'published'),
-        draftEpisodes: (state) => state.episodes.filter(e => e.status === 'draft'),
-        featuredEpisodes: (state) => state.episodes.filter(e => e.featured),
-        
-        episodesByShow: (state) => (showId) => 
-            state.episodes.filter(e => e.showId._id === showId || e.showId === showId)
+        // ✅ Aggiungi getter sicuri
+        publishedEpisodes() {
+            return Array.isArray(this.episodes)
+                ? this.episodes.filter(e => e.status === 'published')
+                : []
+        },
+        draftEpisodes() {
+            return Array.isArray(this.episodes)
+                ? this.episodes.filter(e => e.status === 'draft')
+                : []
+        },
+        featuredEpisodes() {
+            return Array.isArray(this.episodes)
+                ? this.episodes.filter(e => e.featured)
+                : []
+        }
     },
+
 
     actions: {
         async fetchEpisodes(filters = {}) {
             this.loading = true
             this.error = null
+            console.log('Filters:', filters)
             try {
                 const params = new URLSearchParams(filters)
-                const response = await axios.get(`${API_URL}/episodes?${params}`)
+                console.log('Params:', params)
+                const response = await axios.get(`${API_URL}/episodes/${params}`)
                 this.episodes = response.data
+                console.log(response)
                 return response.data
             } catch (error) {
                 this.error = error.response?.data?.error || 'Errore nel caricamento degli episodi'

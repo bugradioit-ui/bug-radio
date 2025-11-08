@@ -337,7 +337,12 @@ const statusOptions = [
 ]
 
 const filteredEpisodes = computed(() => {
-  let episodes = episodesStore.episodes
+  if (!Array.isArray(episodesStore.episodes)) {
+    return []
+  }
+
+  // Crea una COPIA, non modificare l'originale
+  let episodes = [...episodesStore.episodes] // ← Spread operator crea copia
 
   if (selectedShow.value) {
     episodes = episodes.filter(e => e.showId?._id === selectedShow.value || e.showId === selectedShow.value)
@@ -350,9 +355,9 @@ const filteredEpisodes = computed(() => {
   return episodes
 })
 
-const publishedCount = computed(() => episodesStore.episodes.filter(e => e.status === 'published').length)
-const draftCount = computed(() => episodesStore.episodes.filter(e => e.status === 'draft').length)
-const featuredCount = computed(() => episodesStore.episodes.filter(e => e.featured).length)
+const publishedCount = computed(() => episodesStore.publishedEpisodes.length)
+const draftCount = computed(() => episodesStore.draftEpisodes.length)
+const featuredCount = computed(() => episodesStore.featuredEpisodes.length)
 
 const getStatusLabel = (status) => {
   const map = {
@@ -428,7 +433,7 @@ const saveEpisode = async () => {
     })
     return
   }
-
+  console.log("epis",formData.value.showId)
   const episodeData = {
     showId: formData.value.showId,
     title: formData.value.title,
@@ -511,16 +516,19 @@ const deleteEpisode = async (episode) => {
 
 onMounted(async () => {
   try {
+    // ✅ Reset esplicito
+
     await Promise.all([
       episodesStore.fetchEpisodes(),
       showsStore.fetchShows()
     ])
   } catch (error) {
+    console.log(error)
     toast.add({
       severity: 'error',
       summary: 'Errore',
       detail: 'Errore nel caricamento dei dati',
-      life: 3000
+      life: 100000
     })
   }
 })
