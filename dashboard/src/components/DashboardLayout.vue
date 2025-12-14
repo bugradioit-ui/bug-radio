@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard-layout">
-    <!-- Sidebar Unificata -->
+    <!-- Unified Sidebar -->
     <div class="sidebar">
       <div class="sidebar-header">
         <i class="pi pi-radio-button"></i>
@@ -9,57 +9,29 @@
       </div>
 
       <div class="sidebar-menu">
-        <!-- Menu Admin -->
-        <template v-if="authStore.isAdmin">
-          <router-link to="/dashboard" class="menu-item">
-            <i class="pi pi-home"></i>
-            <span>Dashboard</span>
-          </router-link>
-          <router-link to="/shows" class="menu-item">
-            <i class="pi pi-microphone"></i>
-            <span>Shows</span>
-          </router-link>
-          <router-link to="/episodes" class="menu-item">
-            <i class="pi pi-play-circle"></i>
-            <span>Episodi</span>
-          </router-link>
-          <router-link to="/requests" class="menu-item">
-            <i class="pi pi-inbox"></i>
-            <span>Richieste</span>
-            <Badge v-if="showsStore.shows.filter(s => s.requestStatus === 'pending').length > 0" 
-                   :value="showsStore.shows.filter(s => s.requestStatus === 'pending').length" 
-                   severity="warning" />
-          </router-link>
-        </template>
-
-        <!-- Menu Artist -->
-        <template v-else>
-          <router-link to="/dashboard" class="menu-item">
-            <i class="pi pi-home"></i>
-            <span>Le Mie Richieste</span>
-          </router-link>
-          <router-link to="/my-shows" class="menu-item">
-            <i class="pi pi-microphone"></i>
-            <span>I Miei Show</span>
-          </router-link>
-          <router-link to="/my-episodes" class="menu-item">
-            <i class="pi pi-play-circle"></i>
-            <span>I Miei Episodi</span>
-          </router-link>
-          <router-link to="/new-request" class="menu-item">
-            <i class="pi pi-plus-circle"></i>
-            <span>Richiedi Show</span>
-          </router-link>
-        </template>
+        <router-link
+            v-for="item in currentMenuItems"
+            :key="item.to"
+            :to="item.to"
+            class="menu-item"
+        >
+          <i :class="item.icon"></i>
+          <span>{{ item.label }}</span>
+          <Badge
+              v-if="item.badge && item.badgeValue > 0"
+              :value="item.badgeValue"
+              :severity="item.badgeSeverity || 'warning'"
+          />
+        </router-link>
       </div>
 
       <div class="sidebar-footer">
         <div class="user-info">
-          <Avatar 
-            :label="userInitials" 
-            style="background-color: #3b82f6; color: white;" 
-            shape="circle" 
-            size="large"
+          <Avatar
+              :label="userInitials"
+              style="background-color: #3b82f6; color: white;"
+              shape="circle"
+              size="large"
           />
           <div class="user-details">
             <p class="user-name">{{ authStore.user?.name }}</p>
@@ -67,12 +39,12 @@
           </div>
         </div>
         <Button
-          label="Logout"
-          icon="pi pi-sign-out"
-          severity="danger"
-          outlined
-          class="w-full"
-          @click="handleLogout"
+            label="Logout"
+            icon="pi pi-sign-out"
+            severity="danger"
+            outlined
+            class="w-full"
+            @click="handleLogout"
         />
       </div>
     </div>
@@ -123,8 +95,68 @@ const authStore = useAuthStore()
 const showsStore = useShowsStore()
 const toast = useToast()
 
+// Menu configuration
+const adminMenuItems = [
+  {
+    label: 'Dashboard',
+    icon: 'pi pi-home',
+    to: '/dashboard'
+  },
+  {
+    label: 'Shows',
+    icon: 'pi pi-microphone',
+    to: '/shows'
+  },
+  {
+    label: 'Episodes',
+    icon: 'pi pi-play-circle',
+    to: '/episodes'
+  },
+  {
+    label: 'Requests',
+    icon: 'pi pi-inbox',
+    to: '/requests',
+    badge: true,
+    badgeValue: computed(() => showsStore.shows.filter(s => s.requestStatus === 'pending').length),
+    badgeSeverity: 'warning'
+  },
+  {
+    label: 'Streaming',
+    icon: 'pi pi-broadcast',
+    to: '/streaming'
+  }
+]
+
+const artistMenuItems = [
+  {
+    label: 'My Requests',
+    icon: 'pi pi-home',
+    to: '/artist/dashboard'
+  },
+  {
+    label: 'My Shows',
+    icon: 'pi pi-microphone',
+    to: '/artist/my-shows'
+  },
+  {
+    label: 'My Episodes',
+    icon: 'pi pi-play-circle',
+    to: '/artist/my-episodes'
+  },
+  {
+    label: 'Request Show',
+    icon: 'pi pi-plus-circle',
+    to: '/artist/request'
+  }
+]
+
+// Computed menu based on user role
+const currentMenuItems = computed(() => {
+  return authStore.isAdmin ? adminMenuItems : artistMenuItems
+})
+
 const userRoleLabel = computed(() => {
-  return authStore.isAdmin ? 'Amministratore' : 'Artista'
+  return authStore.isAdmin ? 'Administrator' : 'Artist'
 })
 
 const userInitials = computed(() => {
@@ -136,8 +168,8 @@ const handleLogout = () => {
   authStore.logout()
   toast.add({
     severity: 'info',
-    summary: 'Logout effettuato',
-    detail: 'A presto!',
+    summary: 'Logged out',
+    detail: 'See you soon!',
     life: 2000
   })
   router.push('/login')
@@ -304,7 +336,7 @@ const handleLogout = () => {
     position: relative;
     height: auto;
   }
-  
+
   .main-content {
     margin-left: 0;
   }

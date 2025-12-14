@@ -41,7 +41,27 @@ const ShowSchema = new mongoose.Schema({
     },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    airtime: {
+        showId: {
+            type: String,
+            default: null
+        },
+        instanceId: {
+            type: String,
+            default: null
+        },
+        autoSync: {
+            type: Boolean,
+            default: true
+        },
+        lastSync: {
+            type: Date,
+            default: null
+        }
+    }
+}, {
+    timestamps: true
 });
 
 // Auto-generate slug

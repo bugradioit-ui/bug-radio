@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import StreamingView from "@/views/admin/StreamingView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -17,6 +18,11 @@ const router = createRouter({
       path: '/register',
       name: 'register',
       component: () => import('../views/RegisterView.vue')
+    },
+    {
+      path: '/auth/callback',
+      name: 'auth-callback',
+      component: () => import('../views/CallbackView.vue')
     },
 
     // ==================== ADMIN ROUTES ====================
@@ -57,6 +63,21 @@ const router = createRouter({
       name: 'artist-request',
       component: () => import('../views/artist/RequestView.vue'),
       meta: { requiresAuth: true, requiresArtist: true }
+    },
+    {
+      path: '/artist/my-episodes',
+      name: 'artist-episode',
+      component: () => import('../views/artist/EpisodesView.vue'),
+      meta: { requiresAuth: true, requiresArtist: true }
+    },
+    {
+      path: '/streaming',
+      name: 'Streaming',
+      component: StreamingView,
+      meta: {
+        requiresAuth: true,
+        requiresAdmin: true
+      }
     }
   ]
 })

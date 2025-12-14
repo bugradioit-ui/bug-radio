@@ -1,11 +1,10 @@
 <template>
   <DashboardLayout page-title="Episodes Management">
     <template #topbar-actions>
-      <Button
-          label="New Episode"
-          icon="pi pi-plus"
-          @click="openCreateDialog"
-      />
+      <!-- Mostra il messaggio per gli artisti che non possono gestire episodi -->
+      <Message v-if="isArtist" severity="info" :closable="false" style="margin: 0;">
+        Episodes are managed by admin
+      </Message>
     </template>
 
     <!-- Filters -->
@@ -124,7 +123,8 @@
             </template>
           </Column>
 
-          <Column header="Actions" style="width: 150px;">
+          <!-- Mostra azioni solo per admin -->
+          <Column v-if="!isArtist" header="Actions" style="width: 150px;">
             <template #body="{ data }">
               <div class="action-buttons">
                 <Button
@@ -154,11 +154,26 @@
             </template>
           </Column>
 
+          <!-- Per artisti mostra solo colonna "View" -->
+          <Column v-else header="View" style="width: 80px;">
+            <template #body="{ data }">
+              <Button
+                  icon="pi pi-eye"
+                  @click="viewEpisode(data)"
+                  v-tooltip.top="'View Details'"
+                  text
+                  rounded
+              />
+            </template>
+          </Column>
+
           <template #empty>
             <div class="empty-state">
               <i class="pi pi-play-circle"></i>
-              <p>No episodes found</p>
+              <p v-if="isArtist">No episodes found for your shows</p>
+              <p v-else>No episodes found</p>
               <Button
+                  v-if="!isArtist"
                   label="Create First Episode"
                   icon="pi pi-plus"
                   @click="openCreateDialog"
@@ -169,8 +184,9 @@
       </template>
     </Card>
 
-    <!-- Create/Edit Episode Dialog -->
+    <!-- Create/Edit Episode Dialog (SOLO ADMIN) -->
     <Dialog
+        v-if="!isArtist"
         v-model:visible="episodeDialog"
         :header="editingEpisode ? 'Edit Episode' : 'New Episode'"
         modal
@@ -311,8 +327,77 @@
       </template>
     </Dialog>
 
-    <!-- Upload Audio Dialog -->
+    <!-- View Episode Dialog (PER ARTISTI) -->
     <Dialog
+        v-if="isArtist"
+        v-model:visible="viewDialog"
+        header="Episode Details"
+        modal
+        :style="{ width: '600px' }"
+    >
+      <div class="episode-details" v-if="viewingEpisode">
+        <div class="detail-section">
+          <h3>{{ viewingEpisode.title }}</h3>
+          <p class="show-name">
+            <i class="pi pi-microphone"></i> {{ viewingEpisode.showId?.title }}
+          </p>
+        </div>
+
+        <div class="detail-section" v-if="viewingEpisode.description">
+          <h4>Description</h4>
+          <p>{{ viewingEpisode.description }}</p>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-row">
+            <div>
+              <h4>Air Date</h4>
+              <p>{{ formatDate(viewingEpisode.airDate) }}</p>
+            </div>
+            <div>
+              <h4>Duration</h4>
+              <p>{{ formatDuration(viewingEpisode.duration) }}</p>
+            </div>
+            <div>
+              <h4>Status</h4>
+              <Tag
+                  :value="getStatusLabel(viewingEpisode.status)"
+                  :severity="getStatusSeverity(viewingEpisode.status)"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section" v-if="viewingEpisode.externalLinks">
+          <h4>External Links</h4>
+          <div class="external-links">
+            <a v-if="viewingEpisode.externalLinks.mixcloudUrl"
+               :href="viewingEpisode.externalLinks.mixcloudUrl"
+               target="_blank">
+              <i class="pi pi-cloud"></i> Mixcloud
+            </a>
+            <a v-if="viewingEpisode.externalLinks.youtubeUrl"
+               :href="viewingEpisode.externalLinks.youtubeUrl"
+               target="_blank">
+              <i class="pi pi-youtube"></i> YouTube
+            </a>
+            <a v-if="viewingEpisode.externalLinks.spotifyUrl"
+               :href="viewingEpisode.externalLinks.spotifyUrl"
+               target="_blank">
+              <i class="pi pi-spotify"></i> Spotify
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <template #footer>
+        <Button label="Close" @click="viewDialog = false" />
+      </template>
+    </Dialog>
+
+    <!-- Upload Audio Dialog (SOLO ADMIN) -->
+    <Dialog
+        v-if="!isArtist"
         v-model:visible="uploadDialog"
         header="Upload Audio File"
         modal
@@ -328,19 +413,14 @@
             name="audio"
             accept="audio/*"
             :maxFileSize="500000000"
+            @select="onFileSelect"
             :auto="false"
             chooseLabel="Select Audio File"
-            @select="onFileSelect"
-            class="w-full"
         />
-
-        <small class="hint">
-          Max file size: 500MB. Supported formats: MP3, WAV, OGG, FLAC
-        </small>
 
         <div v-if="uploadProgress > 0" class="upload-progress">
           <ProgressBar :value="uploadProgress" />
-          <small>{{ uploadProgress }}%</small>
+          <small>Uploading... {{ uploadProgress }}%</small>
         </div>
       </div>
 
@@ -349,6 +429,7 @@
             label="Cancel"
             @click="uploadDialog = false"
             text
+            :disabled="uploading"
         />
         <Button
             label="Upload"
@@ -360,44 +441,47 @@
     </Dialog>
 
     <Toast />
+    <ConfirmDialog />
   </DashboardLayout>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
-import DashboardLayout from '../../components/DashboardLayout.vue'
+import { useToast } from 'primevue/usetoast'
+import { useAuthStore } from '@/stores/auth'
 import api from '@/api/axios'
+import DashboardLayout from '@/components/DashboardLayout.vue'
 
-const toast = useToast()
 const confirm = useConfirm()
+const toast = useToast()
+const authStore = useAuthStore()
 
-// Data
-const episodes = ref([])
-const shows = ref([])
+// Check if user is artist
+const isArtist = computed(() => authStore.user?.role === 'artist')
+
 const loading = ref(false)
 const saving = ref(false)
+const episodes = ref([])
+const shows = ref([])
+const searchQuery = ref('')
+const episodeDialog = ref(false)
+const viewDialog = ref(false)
+const uploadDialog = ref(false)
+const editingEpisode = ref(null)
+const viewingEpisode = ref(null)
+const selectedEpisode = ref(null)
+const selectedFile = ref(null)
 const uploading = ref(false)
 const uploadProgress = ref(0)
 
-// Dialogs
-const episodeDialog = ref(false)
-const uploadDialog = ref(false)
-const editingEpisode = ref(null)
-const selectedEpisode = ref(null)
-const selectedFile = ref(null)
-
-// Filters
 const filters = ref({
   showId: null,
   status: null
 })
-const searchQuery = ref('')
 
-// Form
 const episodeForm = ref({
-  showId: null,
+  showId: '',
   title: '',
   description: '',
   airDate: null,
@@ -412,14 +496,12 @@ const episodeForm = ref({
 
 const formErrors = ref({})
 
-// Options
 const statusOptions = [
   { label: 'Draft', value: 'draft' },
   { label: 'Published', value: 'published' },
   { label: 'Archived', value: 'archived' }
 ]
 
-// Computed
 const filteredEpisodes = computed(() => {
   let result = episodes.value
 
@@ -435,7 +517,6 @@ const filteredEpisodes = computed(() => {
   return result
 })
 
-// Methods
 const loadEpisodes = async () => {
   loading.value = true
   try {
@@ -476,11 +557,11 @@ const openCreateDialog = () => {
 const openEditDialog = (episode) => {
   editingEpisode.value = episode
   episodeForm.value = {
-    showId: episode.showId?._id,
+    showId: episode.showId?._id || episode.showId,
     title: episode.title,
     description: episode.description || '',
     airDate: episode.airDate ? new Date(episode.airDate) : null,
-    duration: episode.duration || null,
+    duration: episode.duration,
     status: episode.status,
     externalLinks: {
       mixcloudUrl: episode.externalLinks?.mixcloudUrl || '',
@@ -491,9 +572,14 @@ const openEditDialog = (episode) => {
   episodeDialog.value = true
 }
 
+const viewEpisode = (episode) => {
+  viewingEpisode.value = episode
+  viewDialog.value = true
+}
+
 const resetForm = () => {
   episodeForm.value = {
-    showId: null,
+    showId: '',
     title: '',
     description: '',
     airDate: null,
@@ -515,7 +601,7 @@ const validateForm = () => {
     formErrors.value.showId = 'Show is required'
   }
 
-  if (!episodeForm.value.title || episodeForm.value.title.trim() === '') {
+  if (!episodeForm.value.title) {
     formErrors.value.title = 'Title is required'
   }
 
@@ -833,6 +919,80 @@ onMounted(async () => {
   flex-direction: column;
   gap: 0.5rem;
   margin-top: 1rem;
+}
+
+/* Episode Details (Artist View) */
+.episode-details {
+  padding: 1rem 0;
+}
+
+.detail-section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.detail-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.detail-section h3 {
+  margin: 0 0 0.5rem;
+  color: #1f2937;
+  font-size: 1.5rem;
+}
+
+.detail-section h4 {
+  margin: 0 0 0.5rem;
+  color: #4b5563;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.detail-section p {
+  margin: 0;
+  color: #1f2937;
+  line-height: 1.6;
+}
+
+.show-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6b7280 !important;
+  font-size: 0.95rem;
+}
+
+.show-name i {
+  color: #3b82f6;
+}
+
+.detail-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
+}
+
+.external-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.external-links a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #3b82f6;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.external-links a:hover {
+  text-decoration: underline;
 }
 
 .w-full {

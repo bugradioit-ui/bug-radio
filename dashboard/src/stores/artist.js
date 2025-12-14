@@ -24,7 +24,7 @@ export const useArtistStore = defineStore('artist', {
             this.loading = true
             this.error = null
             try {
-                const response = await axios.get(`${API_URL}/artist/shows`)
+                const response = await axios.get(`${API_URL}/shows`)
                 this.myRequests = response.data
             } catch (error) {
                 this.error = error.response?.data?.error || 'Errore nel caricamento delle richieste'
@@ -38,7 +38,7 @@ export const useArtistStore = defineStore('artist', {
             this.loading = true
             this.error = null
             try {
-                const response = await axios.post(`${API_URL}/artist/shows/request`, showData)
+                const response = await axios.post(`${API_URL}/shows/artist/request`, showData)
                 this.myRequests.unshift(response.data)
                 return response.data
             } catch (error) {

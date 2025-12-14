@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
+import api from '@/api/axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
@@ -39,7 +39,7 @@ export const useEpisodesStore = defineStore('episodes', {
             try {
                 const params = new URLSearchParams(filters)
                 console.log('Params:', params)
-                const response = await axios.get(`${API_URL}/episodes/${params}`)
+                const response = await api.get(`${API_URL}/episodes/${params}`)
                 this.episodes = response.data
                 console.log(response)
                 return response.data
@@ -55,7 +55,7 @@ export const useEpisodesStore = defineStore('episodes', {
             this.loading = true
             this.error = null
             try {
-                const response = await axios.get(`${API_URL}/episodes/${id}`)
+                const response = await api.get(`${API_URL}/episodes/${id}`)
                 this.currentEpisode = response.data
                 return response.data
             } catch (error) {
@@ -70,7 +70,7 @@ export const useEpisodesStore = defineStore('episodes', {
             this.loading = true
             this.error = null
             try {
-                const response = await axios.post(`${API_URL}/episodes`, episodeData)
+                const response = await api.post(`${API_URL}/episodes`, episodeData)
                 this.episodes.unshift(response.data)
                 return response.data
             } catch (error) {
@@ -85,7 +85,7 @@ export const useEpisodesStore = defineStore('episodes', {
             this.loading = true
             this.error = null
             try {
-                const response = await axios.put(`${API_URL}/episodes/${id}`, episodeData)
+                const response = await api.put(`${API_URL}/episodes/${id}`, episodeData)
                 const index = this.episodes.findIndex(e => e._id === id)
                 if (index !== -1) {
                     this.episodes[index] = response.data
@@ -103,7 +103,7 @@ export const useEpisodesStore = defineStore('episodes', {
             this.loading = true
             this.error = null
             try {
-                await axios.delete(`${API_URL}/episodes/${id}`)
+                await api.delete(`${API_URL}/episodes/${id}`)
                 this.episodes = this.episodes.filter(e => e._id !== id)
             } catch (error) {
                 this.error = error.response?.data?.error || 'Errore nell\'eliminazione dell\'episodio'

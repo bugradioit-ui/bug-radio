@@ -88,7 +88,52 @@ const EpisodeSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
+    }, localFile: {
+        path: {
+            type: String,
+            default: null
+        },
+        filename: String,
+        size: Number,
+        duration: Number,
+        format: String,
+        bitrate: Number,
+        uploadedAt: Date,
+        exists: {
+            type: Boolean,
+            default: true
+        },
+        deletedAt: Date
+    },
+
+    // Airtime configuration
+    airtime: {
+        fileId: {
+            type: String,
+            default: null
+        },
+        uploaded: {
+            type: Boolean,
+            default: false
+        },
+        uploadedAt: Date,
+        uploadedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        scheduleId: {
+            type: String,
+            default: null
+        },
+        scheduledAt: Date,
+        lastError: String,
+        uploadFailed: {
+            type: Boolean,
+            default: false
+        }
     }
+}, {
+    timestamps: true
 });
 
 // Middleware per aggiornare updatedAt

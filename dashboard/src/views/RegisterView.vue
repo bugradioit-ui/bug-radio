@@ -1,55 +1,94 @@
 <template>
-  <div class="register-container">
-    <div class="register-card">
+  <div class="login-container">
+    <div class="login-card">
       <Card>
         <template #header>
-          <div class="register-header">
+          <div class="login-header">
             <i class="pi pi-radio-button" style="font-size: 3rem; color: #3b82f6;"></i>
-            <h2>BUG Radio - Registrazione Artista</h2>
-            <p>Registrati per proporre il tuo show</p>
+            <h2>BUG Radio CMS</h2>
+            <p>Create your account</p>
           </div>
         </template>
 
         <template #content>
           <form @submit.prevent="handleRegister">
             <div class="form-field">
-              <label for="email">Email *</label>
+              <label for="name">Name</label>
               <InputText
-                  id="email"
-                  v-model="userData.email"
-                  type="email"
-                  placeholder="tua@email.com"
+                  id="name"
+                  v-model="formData.name"
+                  type="text"
+                  placeholder="Your name"
                   required
                   class="w-full"
               />
             </div>
 
             <div class="form-field">
-              <label for="password">Password *</label>
+              <label for="artistName">Artist Name</label>
               <InputText
-                  id="password"
-                  v-model="userData.password"
-                  type="password"
-                  placeholder="Minimo 6 caratteri"
+                  id="artistName"
+                  v-model="formData.artistName"
+                  type="text"
+                  placeholder="Your artist/DJ name"
+                  class="w-full"
+              />
+            </div>
+
+            <div class="form-field">
+              <label for="email">Email</label>
+              <InputText
+                  id="email"
+                  v-model="formData.email"
+                  type="email"
+                  placeholder="your@email.com"
                   required
                   class="w-full"
               />
-              <small>Minimo 6 caratteri</small>
+            </div>
+
+            <div class="form-field">
+              <label for="password">Password</label>
+              <Password
+                  id="password"
+                  v-model="formData.password"
+                  placeholder="Password"
+                  :feedback="true"
+                  toggleMask
+                  required
+                  class="w-full"
+              />
             </div>
 
             <Button
                 type="submit"
-                label="Registrati"
+                label="Register"
                 icon="pi pi-user-plus"
                 :loading="authStore.loading"
                 class="w-full"
             />
-
-            <div class="login-link">
-              Hai già un account?
-              <router-link to="/login">Accedi</router-link>
-            </div>
           </form>
+
+          <!-- Divider -->
+          <div class="divider">
+            <span>or</span>
+          </div>
+
+          <!-- Google Sign Up Button -->
+          <Button
+              @click="handleGoogleSignUp"
+              label="Sign up with Google"
+              icon="pi pi-google"
+              :loading="googleLoading"
+              class="w-full google-btn"
+              outlined
+          />
+
+          <!-- Login Link -->
+          <div class="register-link">
+            Already have an account?
+            <router-link to="/login">Login</router-link>
+          </div>
         </template>
       </Card>
     </div>
@@ -68,48 +107,51 @@ const router = useRouter()
 const authStore = useAuthStore()
 const toast = useToast()
 
-const userData = ref({
+const formData = ref({
+  name: '',
+  artistName: '',
   email: '',
-  password: '',
-  name: 'Artista',  // Nome di default
-  role: 'artist'
+  password: ''
 })
 
-const handleRegister = async () => {
-  if (userData.value.password.length < 6) {
-    toast.add({
-      severity: 'warn',
-      summary: 'Attenzione',
-      detail: 'La password deve essere di almeno 6 caratteri',
-      life: 3000
-    })
-    return
-  }
+const googleLoading = ref(false)
 
+const handleRegister = async () => {
   try {
-    await authStore.register(userData.value)
+    await authStore.register(formData.value)
     toast.add({
       severity: 'success',
-      summary: 'Registrazione completata',
-      detail: 'Ora puoi richiedere il tuo show!',
+      summary: 'Registration Successful',
+      detail: `Welcome ${authStore.userName}!`,
       life: 3000
     })
-    setTimeout(() => {
+
+    // Redirect based on role
+    if (authStore.user?.role === 'admin') {
+      router.push('/shows')
+    } else {
       router.push('/artist/dashboard')
-    }, 1000)
+    }
   } catch (error) {
     toast.add({
       severity: 'error',
-      summary: 'Errore',
-      detail: authStore.error || 'Errore durante la registrazione',
+      summary: 'Error',
+      detail: authStore.error || 'Registration failed',
       life: 3000
     })
   }
 }
+
+const handleGoogleSignUp = () => {
+  googleLoading.value = true
+  // Redirect al backend per Google OAuth
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+  window.location.href = `${apiUrl}/api/auth/google`
+}
 </script>
 
 <style scoped>
-.register-container {
+.login-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -118,22 +160,22 @@ const handleRegister = async () => {
   padding: 2rem;
 }
 
-.register-card {
+.login-card {
   width: 100%;
-  max-width: 500px;
+  max-width: 450px;
 }
 
-.register-header {
+.login-header {
   text-align: center;
   padding: 2rem 2rem 0;
 }
 
-.register-header h2 {
+.login-header h2 {
   margin: 1rem 0 0.5rem;
   color: #1f2937;
 }
 
-.register-header p {
+.login-header p {
   color: #6b7280;
   margin: 0;
 }
@@ -153,25 +195,48 @@ const handleRegister = async () => {
   width: 100%;
 }
 
-.password-hint {
-  margin: 0.5rem 0 0;
-  font-size: 0.875rem;
-  color: #6b7280;
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem 0;
+  color: #9ca3af;
 }
 
-.login-link {
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.divider span {
+  padding: 0 1rem;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Google Button */
+.google-btn {
+  margin-bottom: 1.5rem;
+}
+
+.register-link {
   margin-top: 1.5rem;
   text-align: center;
   color: #6b7280;
 }
 
-.login-link a {
+.register-link a {
   color: #3b82f6;
   text-decoration: none;
   font-weight: 600;
+  margin-left: 0.25rem;
 }
 
-.login-link a:hover {
+.register-link a:hover {
   text-decoration: underline;
 }
 </style>

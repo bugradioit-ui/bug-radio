@@ -6,7 +6,7 @@
           <div class="login-header">
             <i class="pi pi-radio-button" style="font-size: 3rem; color: #3b82f6;"></i>
             <h2>BUG Radio CMS</h2>
-            <p>Accedi al pannello di gestione</p>
+            <p>Login to the management panel</p>
           </div>
         </template>
 
@@ -18,7 +18,7 @@
                   id="email"
                   v-model="credentials.email"
                   type="email"
-                  placeholder="tua@email.com"
+                  placeholder="your@email.com"
                   required
                   class="w-full"
               />
@@ -39,12 +39,33 @@
 
             <Button
                 type="submit"
-                label="Accedi"
+                label="Login"
                 icon="pi pi-sign-in"
                 :loading="authStore.loading"
                 class="w-full"
             />
           </form>
+
+          <!-- Divider -->
+          <div class="divider">
+            <span>or</span>
+          </div>
+
+          <!-- Google Login Button -->
+          <Button
+              @click="handleGoogleLogin"
+              label="Sign in with Google"
+              icon="pi pi-google"
+              :loading="googleLoading"
+              class="w-full google-btn"
+              outlined
+          />
+
+          <!-- Register Link -->
+          <div class="register-link">
+            Don't have an account?
+            <router-link to="/register">Register</router-link>
+          </div>
         </template>
       </Card>
     </div>
@@ -68,17 +89,19 @@ const credentials = ref({
   password: ''
 })
 
+const googleLoading = ref(false)
+
 const handleLogin = async () => {
   try {
     await authStore.login(credentials.value)
     toast.add({
       severity: 'success',
-      summary: 'Login effettuato',
-      detail: `Benvenuto ${authStore.userName}!`,
+      summary: 'Login Successful',
+      detail: `Welcome ${authStore.userName}!`,
       life: 3000
     })
 
-    // Redirect in base al ruolo
+    // Redirect based on role
     if (authStore.user?.role === 'admin') {
       router.push('/shows')
     } else {
@@ -87,11 +110,18 @@ const handleLogin = async () => {
   } catch (error) {
     toast.add({
       severity: 'error',
-      summary: 'Errore',
-      detail: authStore.error || 'Credenziali non valide',
+      summary: 'Error',
+      detail: authStore.error || 'Invalid credentials',
       life: 3000
     })
   }
+}
+
+const handleGoogleLogin = () => {
+  googleLoading.value = true
+  // Redirect al backend per Google OAuth
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+  window.location.href = `${apiUrl}/auth/google`
 }
 </script>
 
@@ -140,6 +170,34 @@ const handleLogin = async () => {
   width: 100%;
 }
 
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem 0;
+  color: #9ca3af;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.divider span {
+  padding: 0 1rem;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Google Button */
+.google-btn {
+  margin-bottom: 1.5rem;
+}
+
 .register-link {
   margin-top: 1.5rem;
   text-align: center;
@@ -150,6 +208,7 @@ const handleLogin = async () => {
   color: #3b82f6;
   text-decoration: none;
   font-weight: 600;
+  margin-left: 0.25rem;
 }
 
 .register-link a:hover {

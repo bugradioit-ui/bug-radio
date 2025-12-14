@@ -5,98 +5,98 @@
         <template #header>
           <div class="request-header">
             <i class="pi pi-radio-button" style="font-size: 3rem; color: #3b82f6;"></i>
-            <h2>Richiedi il tuo Show su BUG Radio</h2>
-            <p>Compila tutti i campi per inviare la tua richiesta all'admin</p>
+            <h2>Request Your Show on BUG Radio</h2>
+            <p>Fill in all fields to submit your request to the admin</p>
           </div>
         </template>
 
         <template #content>
           <form @submit.prevent="submitRequest" class="request-form">
-            <!-- Informazioni Show -->
+            <!-- Show Information -->
             <div class="form-section">
-              <h3><i class="pi pi-microphone"></i> Informazioni Show</h3>
+              <h3><i class="pi pi-microphone"></i> Show Information</h3>
 
               <div class="form-field">
-                <label for="title">Titolo Show *</label>
+                <label for="title">Show Title *</label>
                 <InputText
                     id="title"
                     v-model="formData.title"
-                    placeholder="Es. Noise Ã  Noise"
+                    placeholder="E.g. Noise à Noise"
                     required
                     class="w-full"
                 />
               </div>
 
               <div class="form-field">
-                <label for="description">Descrizione Show *</label>
+                <label for="description">Show Description *</label>
                 <Textarea
                     id="description"
                     v-model="formData.description"
                     rows="6"
-                    placeholder="Descrivi il concept del tuo show, il tipo di musica che proporrai, l'atmosfera che vuoi creare..."
+                    placeholder="Describe your show concept, the type of music you'll feature, the atmosphere you want to create..."
                     required
                     class="w-full"
                 />
-                <small>Spiega nel dettaglio cosa rende unico il tuo show</small>
+                <small>Explain in detail what makes your show unique</small>
               </div>
 
               <div class="form-field">
                 <ImageUpload
-                    label="Immagine Copertina Show *"
+                    label="Show Cover Image *"
                     v-model="formData.image.url"
                 />
               </div>
             </div>
 
-            <!-- Informazioni Artista -->
+            <!-- Artist Information -->
             <div class="form-section">
-              <h3><i class="pi pi-user"></i> Informazioni Artista</h3>
+              <h3><i class="pi pi-user"></i> Artist Information</h3>
 
               <div class="form-field">
                 <ImageUpload
-                    label="Foto Artista"
+                    label="Artist Photo"
                     v-model="formData.artist.photo"
                 />
-                <small>Foto profilo o press photo (opzionale)</small>
+                <small>Profile photo or press photo (optional)</small>
               </div>
 
               <div class="form-field">
-                <label for="artistName">Nome Artista/Curatore *</label>
+                <label for="artistName">Artist/Curator Name *</label>
                 <InputText
                     id="artistName"
                     v-model="formData.artist.name"
-                    placeholder="Il tuo nome o pseudonimo"
+                    placeholder="Your name or pseudonym"
                     required
                     class="w-full"
                 />
               </div>
 
               <div class="form-field">
-                <label for="artistBio">Biografia Artista *</label>
+                <label for="artistBio">Artist Biography *</label>
                 <Textarea
                     id="artistBio"
                     v-model="formData.artist.bio"
                     rows="5"
-                    placeholder="Racconta la tua esperienza musicale, collaborazioni, progetti passati..."
+                    placeholder="Tell us about your musical experience, collaborations, past projects..."
                     required
                     class="w-full"
                 />
               </div>
 
               <div class="form-field">
-                <label for="artistEmail">Email di Contatto *</label>
+                <label for="artistEmail">Contact Email *</label>
                 <InputText
                     id="artistEmail"
                     v-model="formData.artist.email"
                     type="email"
-                    placeholder="tua@email.com"
+                    placeholder="your@email.com"
                     required
                     class="w-full"
                 />
               </div>
 
               <div class="form-field">
-                <label>Social Links (opzionali)</label>
+                <label>Social Links (optional)</label>
                 <div class="social-inputs">
                   <InputText
                       v-model="formData.artist.socialLinks.instagram"
@@ -117,12 +117,12 @@
               </div>
             </div>
 
-            <!-- Generi e Schedule -->
+            <!-- Genres and Schedule -->
             <div class="form-section">
-              <h3><i class="pi pi-tags"></i> Generi Musicali e Programmazione</h3>
+              <h3><i class="pi pi-tags"></i> Musical Genres and Programming</h3>
 
               <div class="form-field">
-                <label for="genres">Generi Musicali *</label>
+                <label for="genres">Musical Genres *</label>
                 <InputText
                     id="genres"
                     v-model="genresInput"
@@ -130,7 +130,7 @@
                     required
                     class="w-full"
                 />
-                <small>Inserisci i generi separati da virgola (almeno uno)</small>
+                <small>Enter genres separated by commas (at least one)</small>
               </div>
 
               <div class="form-field">
@@ -141,28 +141,28 @@
                     placeholder="underground, live, dj-set..."
                     class="w-full"
                 />
-                <small>Parole chiave per descrivere il tuo show (opzionale)</small>
+                <small>Keywords to describe your show (optional)</small>
               </div>
 
               <div class="form-row">
                 <div class="form-field">
-                  <label for="dayOfWeek">Giorno Preferito *</label>
+                  <label for="dayOfWeek">Preferred Day *</label>
                   <Dropdown
                       id="dayOfWeek"
                       v-model="formData.schedule.dayOfWeek"
                       :options="dayOptions"
-                      placeholder="Seleziona giorno"
+                      placeholder="Select day"
                       required
                       class="w-full"
                   />
                 </div>
 
                 <div class="form-field">
-                  <label for="timeSlot">Fascia Oraria *</label>
+                  <label for="timeSlot">Time Slot *</label>
                   <InputText
                       id="timeSlot"
                       v-model="formData.schedule.timeSlot"
-                      placeholder="Es. 20:00 - 22:00"
+                      placeholder="E.g. 20:00 - 22:00"
                       required
                       class="w-full"
                   />
@@ -174,14 +174,14 @@
             <div class="form-actions">
               <Button
                   type="button"
-                  label="Annulla"
+                  label="Cancel"
                   severity="secondary"
                   outlined
                   @click="$router.push('/artist/dashboard')"
               />
               <Button
                   type="submit"
-                  label="Invia Richiesta"
+                  label="Submit Request"
                   icon="pi pi-send"
                   :loading="loading"
               />
@@ -214,7 +214,7 @@ const formData = ref({
     name: '',
     bio: '',
     email: '',
-    photo: '',  // â† Campo foto artista
+    photo: '',
     socialLinks: {
       instagram: '',
       soundcloud: '',
@@ -249,8 +249,8 @@ const validateForm = () => {
   if (!formData.value.title || !formData.value.description) {
     toast.add({
       severity: 'warn',
-      summary: 'Campi mancanti',
-      detail: 'Compila titolo e descrizione dello show',
+      summary: 'Missing Fields',
+      detail: 'Fill in show title and description',
       life: 3000
     })
     return false
@@ -259,8 +259,8 @@ const validateForm = () => {
   if (!formData.value.artist.name || !formData.value.artist.bio || !formData.value.artist.email) {
     toast.add({
       severity: 'warn',
-      summary: 'Campi mancanti',
-      detail: 'Compila tutte le informazioni artista',
+      summary: 'Missing Fields',
+      detail: 'Fill in all artist information',
       life: 3000
     })
     return false
@@ -269,8 +269,8 @@ const validateForm = () => {
   if (!formData.value.image.url) {
     toast.add({
       severity: 'warn',
-      summary: 'Immagine mancante',
-      detail: 'Inserisci l\'URL dell\'immagine di copertina',
+      summary: 'Missing Image',
+      detail: 'Insert cover image URL',
       life: 3000
     })
     return false
@@ -279,8 +279,8 @@ const validateForm = () => {
   if (!genresInput.value.trim()) {
     toast.add({
       severity: 'warn',
-      summary: 'Generi mancanti',
-      detail: 'Inserisci almeno un genere musicale',
+      summary: 'Missing Genres',
+      detail: 'Enter at least one musical genre',
       life: 3000
     })
     return false
@@ -289,8 +289,8 @@ const validateForm = () => {
   if (!formData.value.schedule.dayOfWeek || !formData.value.schedule.timeSlot) {
     toast.add({
       severity: 'warn',
-      summary: 'Schedule mancante',
-      detail: 'Seleziona giorno e fascia oraria preferiti',
+      summary: 'Missing Schedule',
+      detail: 'Select preferred day and time slot',
       life: 3000
     })
     return false
@@ -315,8 +315,8 @@ const submitRequest = async () => {
 
     toast.add({
       severity: 'success',
-      summary: 'Richiesta Inviata!',
-      detail: 'La tua richiesta Ã¨ stata inviata all\'admin per l\'approvazione',
+      summary: 'Request Submitted!',
+      detail: 'Your request has been sent to admin for approval',
       life: 4000
     })
 
@@ -326,8 +326,8 @@ const submitRequest = async () => {
   } catch (error) {
     toast.add({
       severity: 'error',
-      summary: 'Errore',
-      detail: artistStore.error || 'Errore nell\'invio della richiesta',
+      summary: 'Error',
+      detail: artistStore.error || 'Error submitting request',
       life: 3000
     })
   } finally {

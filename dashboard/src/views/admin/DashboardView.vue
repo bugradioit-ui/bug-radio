@@ -1,12 +1,12 @@
 <template>
-  <DashboardLayout page-title="Dashboard Amministratore">
+  <DashboardLayout page-title="Administrator Dashboard">
     <!-- Stats Grid -->
     <div class="stats-grid">
       <Card class="stat-card">
         <template #content>
           <div class="stat-content">
             <div class="stat-info">
-              <h3>Show Totali</h3>
+              <h3>Total Shows</h3>
               <p>{{ showsStore.shows.length }}</p>
             </div>
             <i class="pi pi-microphone stat-icon"></i>
@@ -18,7 +18,7 @@
         <template #content>
           <div class="stat-content">
             <div class="stat-info">
-              <h3>Richieste Pending</h3>
+              <h3>Pending Requests</h3>
               <p>{{ pendingRequestsCount }}</p>
             </div>
             <i class="pi pi-clock stat-icon"></i>
@@ -30,7 +30,7 @@
         <template #content>
           <div class="stat-content">
             <div class="stat-info">
-              <h3>Show Attivi</h3>
+              <h3>Active Shows</h3>
               <p>{{ activeShowsCount }}</p>
             </div>
             <i class="pi pi-check-circle stat-icon"></i>
@@ -42,7 +42,7 @@
         <template #content>
           <div class="stat-content">
             <div class="stat-info">
-              <h3>Episodi Totali</h3>
+              <h3>Total Episodes</h3>
               <p>{{ episodesStore.episodes.length }}</p>
             </div>
             <i class="pi pi-play-circle stat-icon"></i>
@@ -53,29 +53,29 @@
 
     <!-- Quick Actions -->
     <Card class="actions-card">
-      <template #title>Azioni Rapide</template>
+      <template #title>Quick Actions</template>
       <template #content>
         <div class="quick-actions">
           <Button
-            label="Gestisci Show"
-            icon="pi pi-microphone"
-            @click="$router.push('/shows')"
-            size="large"
+              label="Manage Shows"
+              icon="pi pi-microphone"
+              @click="$router.push('/shows')"
+              size="large"
           />
           <Button
-            label="Gestisci Episodi"
-            icon="pi pi-play-circle"
-            severity="secondary"
-            @click="$router.push('/episodes')"
-            size="large"
+              label="Manage Episodes"
+              icon="pi pi-play-circle"
+              severity="secondary"
+              @click="$router.push('/episodes')"
+              size="large"
           />
           <Button
-            label="Richieste Pending"
-            icon="pi pi-inbox"
-            severity="warning"
-            @click="$router.push('/requests')"
-            size="large"
-            :badge="pendingRequestsCount > 0 ? pendingRequestsCount.toString() : undefined"
+              label="Pending Requests"
+              icon="pi pi-inbox"
+              severity="warning"
+              @click="$router.push('/requests')"
+              size="large"
+              :badge="pendingRequestsCount > 0 ? pendingRequestsCount.toString() : undefined"
           />
         </div>
       </template>
@@ -83,34 +83,34 @@
 
     <!-- Recent Requests -->
     <Card v-if="recentRequests.length > 0">
-      <template #title>Ultime Richieste</template>
+      <template #title>Recent Requests</template>
       <template #content>
         <DataTable
-          :value="recentRequests"
-          stripedRows
+            :value="recentRequests"
+            stripedRows
         >
-          <Column field="title" header="Titolo Show" style="min-width: 200px;"></Column>
-          <Column field="artist.name" header="Artista"></Column>
+          <Column field="title" header="Show Title" style="min-width: 200px;"></Column>
+          <Column field="artist.name" header="Artist"></Column>
           <Column field="requestStatus" header="Status">
             <template #body="slotProps">
               <Tag
-                :value="getRequestStatusLabel(slotProps.data.requestStatus)"
-                :severity="getRequestStatusSeverity(slotProps.data.requestStatus)"
+                  :value="getRequestStatusLabel(slotProps.data.requestStatus)"
+                  :severity="getRequestStatusSeverity(slotProps.data.requestStatus)"
               />
             </template>
           </Column>
-          <Column field="createdAt" header="Data Richiesta">
+          <Column field="createdAt" header="Request Date">
             <template #body="slotProps">
               {{ formatDate(slotProps.data.createdAt) }}
             </template>
           </Column>
-          <Column header="Azioni">
+          <Column header="Actions">
             <template #body="slotProps">
               <Button
-                label="Vedi"
-                icon="pi pi-arrow-right"
-                text
-                @click="$router.push('/requests')"
+                  label="View"
+                  icon="pi pi-arrow-right"
+                  text
+                  @click="$router.push('/requests')"
               />
             </template>
           </Column>
@@ -120,13 +120,13 @@
 
     <!-- Recent Episodes -->
     <Card v-if="recentEpisodes.length > 0">
-      <template #title>Ultimi Episodi</template>
+      <template #title>Recent Episodes</template>
       <template #content>
         <DataTable
-          :value="recentEpisodes"
-          stripedRows
+            :value="recentEpisodes"
+            stripedRows
         >
-          <Column field="title" header="Titolo" style="min-width: 200px;"></Column>
+          <Column field="title" header="Title" style="min-width: 200px;"></Column>
           <Column field="showId.title" header="Show">
             <template #body="slotProps">
               {{ slotProps.data.showId?.title || '-' }}
@@ -135,12 +135,12 @@
           <Column field="status" header="Status">
             <template #body="slotProps">
               <Tag
-                :value="getStatusLabel(slotProps.data.status)"
-                :severity="getStatusSeverity(slotProps.data.status)"
+                  :value="getStatusLabel(slotProps.data.status)"
+                  :severity="getStatusSeverity(slotProps.data.status)"
               />
             </template>
           </Column>
-          <Column field="airDate" header="Data">
+          <Column field="airDate" header="Date">
             <template #body="slotProps">
               {{ formatDate(slotProps.data.airDate) }}
             </template>
@@ -166,31 +166,31 @@ const showsStore = useShowsStore()
 const episodesStore = useEpisodesStore()
 const toast = useToast()
 
-const pendingRequestsCount = computed(() => 
-  showsStore.shows.filter(s => s.requestStatus === 'pending').length
+const pendingRequestsCount = computed(() =>
+    showsStore.shows.filter(s => s.requestStatus === 'pending').length
 )
 
-const activeShowsCount = computed(() => 
-  showsStore.shows.filter(s => s.status === 'active').length
+const activeShowsCount = computed(() =>
+    showsStore.shows.filter(s => s.status === 'active').length
 )
 
-const recentRequests = computed(() => 
-  showsStore.shows
-    .filter(s => s.requestStatus === 'pending')
-    .slice(0, 5)
+const recentRequests = computed(() =>
+    showsStore.shows
+        .filter(s => s.requestStatus === 'pending')
+        .slice(0, 5)
 )
 
-const recentEpisodes = computed(() => 
-  episodesStore.episodes
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 5)
+const recentEpisodes = computed(() =>
+    episodesStore.episodes
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 5)
 )
 
 const getRequestStatusLabel = (status) => {
   const map = {
-    pending: 'IN ATTESA',
-    approved: 'APPROVATO',
-    rejected: 'RIFIUTATO'
+    pending: 'PENDING',
+    approved: 'APPROVED',
+    rejected: 'REJECTED'
   }
   return map[status] || status?.toUpperCase()
 }
@@ -206,9 +206,9 @@ const getRequestStatusSeverity = (status) => {
 
 const getStatusLabel = (status) => {
   const map = {
-    draft: 'BOZZA',
-    published: 'PUBBLICATO',
-    archived: 'ARCHIVIATO'
+    draft: 'DRAFT',
+    published: 'PUBLISHED',
+    archived: 'ARCHIVED'
   }
   return map[status] || status?.toUpperCase()
 }
@@ -224,7 +224,7 @@ const getStatusSeverity = (status) => {
 
 const formatDate = (date) => {
   if (!date) return '-'
-  return new Date(date).toLocaleDateString('it-IT', {
+  return new Date(date).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
@@ -240,8 +240,8 @@ onMounted(async () => {
   } catch (error) {
     toast.add({
       severity: 'error',
-      summary: 'Errore',
-      detail: 'Errore nel caricamento dei dati',
+      summary: 'Error',
+      detail: 'Error loading data',
       life: 3000
     })
   }

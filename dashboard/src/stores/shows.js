@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
+import api from '@/api/axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
 
@@ -28,7 +28,7 @@ export const useShowsStore = defineStore('shows', {
             this.error = null
             try {
                 const params = new URLSearchParams(filters)
-                const response = await axios.get(`${API_URL}/shows?${params}`)
+                const response = await api.get(`${API_URL}/shows?${params}`)
                 this.shows = response.data
             } catch (error) {
                 this.error = error.response?.data?.error || 'Errore nel caricamento degli show'
@@ -42,7 +42,7 @@ export const useShowsStore = defineStore('shows', {
             this.loading = true
             this.error = null
             try {
-                const response = await axios.get(`${API_URL}/shows/${id}`)
+                const response = await api.get(`${API_URL}/shows/${id}`)
                 this.currentShow = response.data
                 return response.data
             } catch (error) {
@@ -57,7 +57,7 @@ export const useShowsStore = defineStore('shows', {
             this.loading = true
             this.error = null
             try {
-                const response = await axios.post(`${API_URL}/shows`, showData)
+                const response = await api.post(`${API_URL}/shows`, showData)
                 this.shows.unshift(response.data)
                 return response.data
             } catch (error) {
@@ -72,7 +72,7 @@ export const useShowsStore = defineStore('shows', {
             this.loading = true
             this.error = null
             try {
-                const response = await axios.put(`${API_URL}/shows/${id}`, showData)
+                const response = await api.put(`${API_URL}/shows/${id}`, showData)
                 const index = this.shows.findIndex(s => s._id === id)
                 if (index !== -1) {
                     this.shows[index] = response.data
@@ -90,7 +90,7 @@ export const useShowsStore = defineStore('shows', {
             this.loading = true
             this.error = null
             try {
-                await axios.delete(`${API_URL}/shows/${id}`)
+                await api.delete(`${API_URL}/shows/${id}`)
                 this.shows = this.shows.filter(s => s._id !== id)
             } catch (error) {
                 this.error = error.response?.data?.error || 'Errore nell\'eliminazione dello show'

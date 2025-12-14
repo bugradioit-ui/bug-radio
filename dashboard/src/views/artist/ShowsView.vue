@@ -1,11 +1,17 @@
 <template>
   <DashboardLayout page-title="Gestione Shows">
     <template #topbar-actions>
+      <!-- Pulsante per creare show solo per admin -->
       <Button
-        label="Nuovo Show"
-        icon="pi pi-plus"
-        @click="openDialog()"
+          v-if="!isArtist"
+          label="Nuovo Show"
+          icon="pi pi-plus"
+          @click="openDialog()"
       />
+      <!-- Messaggio per artisti -->
+      <Message v-else severity="info" :closable="false" style="margin: 0;">
+        Shows are managed by admin. You can only view them.
+      </Message>
     </template>
 
     <!-- Filters -->
@@ -13,39 +19,39 @@
       <template #content>
         <div class="filters">
           <Button
-            :label="`Richieste Pending (${pendingRequestsCount})`"
-            :severity="currentFilter === 'pending' ? 'warning' : 'secondary'"
-            :outlined="currentFilter !== 'pending'"
-            @click="currentFilter = 'pending'"
-            icon="pi pi-clock"
+              :label="`Richieste Pending (${pendingRequestsCount})`"
+              :severity="currentFilter === 'pending' ? 'warning' : 'secondary'"
+              :outlined="currentFilter !== 'pending'"
+              @click="currentFilter = 'pending'"
+              icon="pi pi-clock"
           />
           <Button
-            :label="`Attivi (${activeShowsCount})`"
-            :severity="currentFilter === 'active' ? 'success' : 'secondary'"
-            :outlined="currentFilter !== 'active'"
-            @click="currentFilter = 'active'"
-            icon="pi pi-check-circle"
+              :label="`Attivi (${activeShowsCount})`"
+              :severity="currentFilter === 'active' ? 'success' : 'secondary'"
+              :outlined="currentFilter !== 'active'"
+              @click="currentFilter = 'active'"
+              icon="pi pi-check-circle"
           />
           <Button
-            :label="`Inattivi (${inactiveShowsCount})`"
-            :severity="currentFilter === 'inactive' ? 'info' : 'secondary'"
-            :outlined="currentFilter !== 'inactive'"
-            @click="currentFilter = 'inactive'"
-            icon="pi pi-pause"
+              :label="`Inattivi (${inactiveShowsCount})`"
+              :severity="currentFilter === 'inactive' ? 'info' : 'secondary'"
+              :outlined="currentFilter !== 'inactive'"
+              @click="currentFilter = 'inactive'"
+              icon="pi pi-pause"
           />
           <Button
-            :label="`Rifiutati (${rejectedRequestsCount})`"
-            :severity="currentFilter === 'rejected' ? 'danger' : 'secondary'"
-            :outlined="currentFilter !== 'rejected'"
-            @click="currentFilter = 'rejected'"
-            icon="pi pi-times"
+              :label="`Rifiutati (${rejectedRequestsCount})`"
+              :severity="currentFilter === 'rejected' ? 'danger' : 'secondary'"
+              :outlined="currentFilter !== 'rejected'"
+              @click="currentFilter = 'rejected'"
+              icon="pi pi-times"
           />
           <Button
-            label="Tutti"
-            :severity="currentFilter === 'all' ? 'contrast' : 'secondary'"
-            :outlined="currentFilter !== 'all'"
-            @click="currentFilter = 'all'"
-            icon="pi pi-list"
+              label="Tutti"
+              :severity="currentFilter === 'all' ? 'contrast' : 'secondary'"
+              :outlined="currentFilter !== 'all'"
+              @click="currentFilter = 'all'"
+              icon="pi pi-list"
           />
         </div>
       </template>
@@ -55,19 +61,24 @@
     <Card>
       <template #content>
         <DataTable
-          :value="filteredShows"
-          :loading="showsStore.loading"
-          paginator
-          :rows="10"
-          stripedRows
-          sortField="updatedAt"
-          :sortOrder="-1"
+            :value="filteredShows"
+            :loading="showsStore.loading"
+            paginator
+            :rows="10"
+            stripedRows
+            sortField="updatedAt"
+            :sortOrder="-1"
         >
           <template #empty>
             <div class="empty-state">
               <i class="pi pi-microphone" style="font-size: 3rem; color: #cbd5e1;"></i>
               <p>Nessuno show {{ getFilterLabel() }}</p>
-              <Button label="Crea il primo show" icon="pi pi-plus" @click="openDialog()" />
+              <Button
+                  v-if="!isArtist"
+                  label="Crea il primo show"
+                  icon="pi pi-plus"
+                  @click="openDialog()"
+              />
             </div>
           </template>
 
@@ -78,11 +89,11 @@
             <template #body="slotProps">
               <div class="genres-tags">
                 <Tag
-                  v-for="genre in slotProps.data.genres?.slice(0, 2)"
-                  :key="genre"
-                  :value="genre"
-                  severity="info"
-                  class="genre-tag"
+                    v-for="genre in slotProps.data.genres?.slice(0, 2)"
+                    :key="genre"
+                    :value="genre"
+                    severity="info"
+                    class="genre-tag"
                 />
                 <span v-if="slotProps.data.genres?.length > 2" class="more-genres">
                   +{{ slotProps.data.genres.length - 2 }}
@@ -93,87 +104,104 @@
           <Column field="requestStatus" header="Status Richiesta" sortable>
             <template #body="slotProps">
               <Tag
-                :value="getRequestStatusLabel(slotProps.data.requestStatus)"
-                :severity="getRequestStatusSeverity(slotProps.data.requestStatus)"
+                  :value="getRequestStatusLabel(slotProps.data.requestStatus)"
+                  :severity="getRequestStatusSeverity(slotProps.data.requestStatus)"
               />
             </template>
           </Column>
           <Column field="status" header="Status Show" sortable>
             <template #body="slotProps">
               <Tag
-                :value="getStatusLabel(slotProps.data.status)"
-                :severity="getStatusSeverity(slotProps.data.status)"
+                  :value="getStatusLabel(slotProps.data.status)"
+                  :severity="getStatusSeverity(slotProps.data.status)"
               />
             </template>
           </Column>
           <Column field="featured" header="Featured" sortable>
             <template #body="slotProps">
               <i
-                :class="slotProps.data.featured ? 'pi pi-star-fill' : 'pi pi-star'"
-                :style="{ color: slotProps.data.featured ? '#f59e0b' : '#cbd5e1' }"
+                  :class="slotProps.data.featured ? 'pi pi-star-fill' : 'pi pi-star'"
+                  :style="{ color: slotProps.data.featured ? '#f59e0b' : '#cbd5e1' }"
               ></i>
             </template>
           </Column>
-          <Column header="Azioni" style="width: 250px;">
+
+          <!-- Azioni per ADMIN -->
+          <Column v-if="!isArtist" header="Azioni" style="width: 250px;">
             <template #body="slotProps">
               <div class="action-buttons">
                 <!-- Azioni per richieste pending -->
                 <Button
-                  v-if="slotProps.data.requestStatus === 'pending'"
-                  icon="pi pi-check"
-                  rounded
-                  severity="success"
-                  @click="approveRequest(slotProps.data)"
-                  v-tooltip.top="'Approva Richiesta'"
+                    v-if="slotProps.data.requestStatus === 'pending'"
+                    icon="pi pi-check"
+                    rounded
+                    severity="success"
+                    @click="approveRequest(slotProps.data)"
+                    v-tooltip.top="'Approva Richiesta'"
                 />
                 <Button
-                  v-if="slotProps.data.requestStatus === 'pending'"
-                  icon="pi pi-times"
-                  rounded
-                  severity="danger"
-                  @click="rejectRequest(slotProps.data)"
-                  v-tooltip.top="'Rifiuta Richiesta'"
+                    v-if="slotProps.data.requestStatus === 'pending'"
+                    icon="pi pi-times"
+                    rounded
+                    severity="danger"
+                    @click="rejectRequest(slotProps.data)"
+                    v-tooltip.top="'Rifiuta Richiesta'"
                 />
 
                 <!-- Azioni standard -->
                 <Button
+                    icon="pi pi-eye"
+                    rounded
+                    outlined
+                    severity="info"
+                    @click="viewShow(slotProps.data)"
+                    v-tooltip.top="'Dettagli'"
+                />
+                <Button
+                    icon="pi pi-pencil"
+                    rounded
+                    outlined
+                    severity="secondary"
+                    @click="openDialog(slotProps.data)"
+                    v-tooltip.top="'Modifica'"
+                />
+                <Button
+                    icon="pi pi-trash"
+                    rounded
+                    outlined
+                    severity="danger"
+                    @click="confirmDelete(slotProps.data)"
+                    v-tooltip.top="'Elimina'"
+                />
+              </div>
+            </template>
+          </Column>
+
+          <!-- Azioni per ARTISTI (solo view) -->
+          <Column v-else header="Azioni" style="width: 80px;">
+            <template #body="slotProps">
+              <Button
                   icon="pi pi-eye"
                   rounded
                   outlined
                   severity="info"
                   @click="viewShow(slotProps.data)"
-                  v-tooltip.top="'Dettagli'"
-                />
-                <Button
-                  icon="pi pi-pencil"
-                  rounded
-                  outlined
-                  severity="secondary"
-                  @click="openDialog(slotProps.data)"
-                  v-tooltip.top="'Modifica'"
-                />
-                <Button
-                  icon="pi pi-trash"
-                  rounded
-                  outlined
-                  severity="danger"
-                  @click="confirmDelete(slotProps.data)"
-                  v-tooltip.top="'Elimina'"
-                />
-              </div>
+                  v-tooltip.top="'View Details'"
+              />
             </template>
           </Column>
         </DataTable>
       </template>
     </Card>
 
-    <!-- Dialog Crea/Modifica Show -->
+    <!-- Dialog Crea/Modifica Show (SOLO ADMIN) -->
     <Dialog
-      v-model:visible="dialogVisible"
-      :header="editingShow ? 'Modifica Show' : 'Nuovo Show'"
-      :modal="true"
-      :style="{ width: '800px' }"
-      :maximizable="true"
+        v-if="!isArtist"
+        v-model:visible="dialogVisible"
+        :header="editingShow ? 'Modifica Show' : 'Nuovo Show'"
+        :modal="true"
+        :style="{ width: '800px' }"
+        :maximizable="true"
     >
       <div class="dialog-content">
         <div class="form-section">
@@ -181,29 +209,29 @@
 
           <div class="form-field">
             <ImageUpload
-              label="Immagine Copertina Show"
-              v-model="formData.image.url"
+                label="Immagine Copertina Show"
+                v-model="formData.image.url"
             />
           </div>
 
           <div class="form-field">
             <label for="title">Titolo Show *</label>
             <InputText
-              id="title"
-              v-model="formData.title"
-              placeholder="Es. Noise à Noise"
-              class="w-full"
+                id="title"
+                v-model="formData.title"
+                placeholder="Es. Noise à Noise"
+                class="w-full"
             />
           </div>
 
           <div class="form-field">
             <label for="description">Descrizione *</label>
             <Textarea
-              id="description"
-              v-model="formData.description"
-              rows="5"
-              placeholder="Descrivi lo show..."
-              class="w-full"
+                id="description"
+                v-model="formData.description"
+                rows="5"
+                placeholder="Descrivi lo show..."
+                class="w-full"
             />
           </div>
         </div>
@@ -213,40 +241,40 @@
 
           <div class="form-field">
             <ImageUpload
-              label="Foto Artista"
-              v-model="formData.artist.photo"
+                label="Foto Artista"
+                v-model="formData.artist.photo"
             />
           </div>
 
           <div class="form-field">
             <label for="artistName">Nome Artista *</label>
             <InputText
-              id="artistName"
-              v-model="formData.artist.name"
-              placeholder="Nome curatore/artista"
-              class="w-full"
+                id="artistName"
+                v-model="formData.artist.name"
+                placeholder="Nome curatore/artista"
+                class="w-full"
             />
           </div>
 
           <div class="form-field">
             <label for="artistBio">Bio Artista</label>
             <Textarea
-              id="artistBio"
-              v-model="formData.artist.bio"
-              rows="3"
-              placeholder="Biografia dell'artista..."
-              class="w-full"
+                id="artistBio"
+                v-model="formData.artist.bio"
+                rows="3"
+                placeholder="Biografia dell'artista..."
+                class="w-full"
             />
           </div>
 
           <div class="form-field">
             <label for="artistEmail">Email Artista</label>
             <InputText
-              id="artistEmail"
-              v-model="formData.artist.email"
-              type="email"
-              placeholder="email@example.com"
-              class="w-full"
+                id="artistEmail"
+                v-model="formData.artist.email"
+                type="email"
+                placeholder="email@example.com"
+                class="w-full"
             />
           </div>
         </div>
@@ -257,10 +285,10 @@
           <div class="form-field">
             <label for="genres">Generi (separati da virgola)</label>
             <InputText
-              id="genres"
-              v-model="genresInput"
-              placeholder="Ambient, Experimental, Drone"
-              class="w-full"
+                id="genres"
+                v-model="genresInput"
+                placeholder="Ambient, Experimental, Drone"
+                class="w-full"
             />
             <small>Inserisci i generi separati da virgola</small>
           </div>
@@ -268,10 +296,10 @@
           <div class="form-field">
             <label for="tags">Tags (separati da virgola)</label>
             <InputText
-              id="tags"
-              v-model="tagsInput"
-              placeholder="underground, electronic, live"
-              class="w-full"
+                id="tags"
+                v-model="tagsInput"
+                placeholder="underground, electronic, live"
+                class="w-full"
             />
           </div>
         </div>
@@ -283,77 +311,77 @@
             <div class="form-field">
               <label for="requestStatus">Status Richiesta</label>
               <Dropdown
-                id="requestStatus"
-                v-model="formData.requestStatus"
-                :options="requestStatusOptions"
-                optionLabel="label"
-                optionValue="value"
-                placeholder="Seleziona status"
-                class="w-full"
+                  id="requestStatus"
+                  v-model="formData.requestStatus"
+                  :options="requestStatusOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Seleziona status"
+                  class="w-full"
               />
             </div>
 
             <div class="form-field">
               <label for="status">Status Show</label>
               <Dropdown
-                id="status"
-                v-model="formData.status"
-                :options="statusOptions"
-                optionLabel="label"
-                optionValue="value"
-                placeholder="Seleziona status"
-                class="w-full"
+                  id="status"
+                  v-model="formData.status"
+                  :options="statusOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Seleziona status"
+                  class="w-full"
               />
             </div>
           </div>
 
-          <div class="form-field">
-            <label for="featured">In Evidenza</label>
-            <div class="checkbox-field">
-              <Checkbox
-                id="featured"
-                v-model="formData.featured"
-                :binary="true"
-              />
-              <label for="featured">Mostra in homepage</label>
-            </div>
+          <div class="checkbox-field">
+            <Checkbox v-model="formData.featured" inputId="featured" :binary="true" />
+            <label for="featured">Show in evidenza (Featured)</label>
           </div>
         </div>
       </div>
 
       <template #footer>
-        <Button label="Annulla" severity="secondary" @click="dialogVisible = false" outlined />
+        <Button label="Annulla" @click="dialogVisible = false" text />
         <Button
-          :label="editingShow ? 'Salva Modifiche' : 'Crea Show'"
-          @click="saveShow"
-          :loading="showsStore.loading"
+            :label="editingShow ? 'Aggiorna' : 'Crea'"
+            @click="saveShow"
+            :loading="showsStore.loading"
         />
       </template>
     </Dialog>
 
-    <ConfirmDialog />
     <Toast />
+    <ConfirmDialog />
   </DashboardLayout>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { useShowsStore } from '@/stores/shows.js'
-import { useToast } from 'primevue/usetoast'
+import { ref, computed, onMounted } from 'vue'
+import { useShowsStore } from '@/stores/shows'
+import { useAuthStore } from '@/stores/auth'
 import { useConfirm } from 'primevue/useconfirm'
-import DashboardLayout from '../../components/DashboardLayout.vue'
-import ImageUpload from '../../components/ImageUpload.vue'
-import api from '@/api/axios';
+import { useToast } from 'primevue/usetoast'
+import api from '@/api/axios'
+import ImageUpload from '@/components/ImageUpload.vue'
+import DashboardLayout from '@/components/DashboardLayout.vue'
+
+const API_URL = import.meta.env.VITE_API_URL
 
 const showsStore = useShowsStore()
-const toast = useToast()
+const authStore = useAuthStore()
 const confirm = useConfirm()
+const toast = useToast()
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api'
+// Check if user is artist
+const isArtist = computed(() => authStore.user?.role === 'artist')
 
 const dialogVisible = ref(false)
 const editingShow = ref(null)
-const currentFilter = ref('pending')
+const currentFilter = ref('all')
+const genresInput = ref('')
+const tagsInput = ref('')
 
 const formData = ref({
   title: '',
@@ -365,10 +393,7 @@ const formData = ref({
     photo: '',
     socialLinks: {}
   },
-  image: {
-    url: '',
-    alt: ''
-  },
+  image: { url: '', alt: '' },
   genres: [],
   tags: [],
   requestStatus: 'pending',
@@ -376,73 +401,61 @@ const formData = ref({
   featured: false
 })
 
-const genresInput = ref('')
-const tagsInput = ref('')
-
 const requestStatusOptions = [
-  { label: 'In Attesa', value: 'pending' },
-  { label: 'Approvato', value: 'approved' },
-  { label: 'Rifiutato', value: 'rejected' }
+  { label: 'Pending', value: 'pending' },
+  { label: 'Approved', value: 'approved' },
+  { label: 'Rejected', value: 'rejected' }
 ]
 
 const statusOptions = [
-  { label: 'Attivo', value: 'active' },
-  { label: 'Inattivo', value: 'inactive' },
-  { label: 'Archiviato', value: 'archived' }
+  { label: 'Active', value: 'active' },
+  { label: 'Inactive', value: 'inactive' }
 ]
 
-// Computed per filtri
-const pendingRequests = computed(() =>
-  showsStore.shows.filter(s => s.requestStatus === 'pending')
-)
-const activeShows = computed(() =>
-  showsStore.shows.filter(s => s.status === 'active' && s.requestStatus === 'approved')
-)
-const inactiveShows = computed(() =>
-  showsStore.shows.filter(s => s.status === 'inactive')
-)
-const rejectedRequests = computed(() =>
-  showsStore.shows.filter(s => s.requestStatus === 'rejected')
-)
-
-const pendingRequestsCount = computed(() => pendingRequests.value.length)
-const activeShowsCount = computed(() => activeShows.value.length)
-const inactiveShowsCount = computed(() => inactiveShows.value.length)
-const rejectedRequestsCount = computed(() => rejectedRequests.value.length)
-
 const filteredShows = computed(() => {
-  switch (currentFilter.value) {
-    case 'pending':
-      return pendingRequests.value
-    case 'active':
-      return activeShows.value
-    case 'inactive':
-      return inactiveShows.value
-    case 'rejected':
-      return rejectedRequests.value
-    case 'all':
-      return showsStore.shows
-    default:
-      return showsStore.shows
+  const shows = showsStore.shows
+  if (currentFilter.value === 'all') return shows
+  if (currentFilter.value === 'pending') {
+    return shows.filter(s => s.requestStatus === 'pending')
   }
+  if (currentFilter.value === 'rejected') {
+    return shows.filter(s => s.requestStatus === 'rejected')
+  }
+  return shows.filter(s => s.status === currentFilter.value)
 })
+
+const pendingRequestsCount = computed(() =>
+    showsStore.shows.filter(s => s.requestStatus === 'pending').length
+)
+
+const rejectedRequestsCount = computed(() =>
+    showsStore.shows.filter(s => s.requestStatus === 'rejected').length
+)
+
+const activeShowsCount = computed(() =>
+    showsStore.shows.filter(s => s.status === 'active').length
+)
+
+const inactiveShowsCount = computed(() =>
+    showsStore.shows.filter(s => s.status === 'inactive').length
+)
 
 const getFilterLabel = () => {
   const labels = {
-    pending: 'in attesa di approvazione',
-    active: 'attivo',
-    inactive: 'inattivo',
-    rejected: 'rifiutato',
-    all: ''
+    all: 'trovati',
+    pending: 'in attesa',
+    active: 'attivi',
+    inactive: 'inattivi',
+    rejected: 'rifiutati'
   }
   return labels[currentFilter.value] || ''
 }
 
 const getRequestStatusLabel = (status) => {
   const map = {
-    pending: 'IN ATTESA',
-    approved: 'APPROVATO',
-    rejected: 'RIFIUTATO'
+    pending: 'PENDING',
+    approved: 'APPROVED',
+    rejected: 'REJECTED'
   }
   return map[status] || status?.toUpperCase()
 }
@@ -457,29 +470,23 @@ const getRequestStatusSeverity = (status) => {
 }
 
 const getStatusLabel = (status) => {
-  const map = {
-    active: 'ATTIVO',
-    inactive: 'INATTIVO',
-    archived: 'ARCHIVIATO'
-  }
-  return map[status] || status?.toUpperCase()
+  return status?.toUpperCase() || '-'
 }
 
 const getStatusSeverity = (status) => {
   const map = {
     active: 'success',
-    inactive: 'warning',
-    archived: 'secondary'
+    inactive: 'secondary'
   }
   return map[status] || 'info'
 }
 
 const openDialog = (show = null) => {
+  editingShow.value = show
   if (show) {
-    editingShow.value = show
     formData.value = {
-      title: show.title,
-      description: show.description,
+      title: show.title || '',
+      description: show.description || '',
       artist: {
         name: show.artist?.name || '',
         bio: show.artist?.bio || '',
@@ -493,14 +500,13 @@ const openDialog = (show = null) => {
       },
       genres: show.genres || [],
       tags: show.tags || [],
-      requestStatus: show.requestStatus,
-      status: show.status,
-      featured: show.featured
+      requestStatus: show.requestStatus || 'pending',
+      status: show.status || 'active',
+      featured: show.featured || false
     }
-    genresInput.value = (show.genres || []).join(', ')
-    tagsInput.value = (show.tags || []).join(', ')
+    genresInput.value = show.genres?.join(', ') || ''
+    tagsInput.value = show.tags?.join(', ') || ''
   } else {
-    editingShow.value = null
     formData.value = {
       title: '',
       description: '',
@@ -587,7 +593,24 @@ const saveShow = async () => {
 }
 
 const viewShow = (show) => {
-  alert(`Dettagli show:\n\nTitolo: ${show.title}\nSlug: ${show.slug}\nStatus: ${show.status}\nRequest Status: ${show.requestStatus}`)
+  const details = `
+Dettagli Show:
+
+Titolo: ${show.title}
+Artista: ${show.artist?.name || '-'}
+Email: ${show.artist?.email || '-'}
+Status: ${show.status}
+Request Status: ${show.requestStatus}
+Featured: ${show.featured ? 'Sì' : 'No'}
+Generi: ${show.genres?.join(', ') || '-'}
+
+Descrizione:
+${show.description || '-'}
+
+${show.adminNotes ? `Note Admin:\n${show.adminNotes}` : ''}
+  `.trim()
+
+  alert(details)
 }
 
 const approveRequest = async (show) => {
@@ -630,7 +653,7 @@ const rejectRequest = async (show) => {
   if (!rejectReason) return
 
   try {
-    await api.put(`${API_URL}/admin/shows/${show._id}/reject`, {
+    await api.put(`${API_URL}/shows/admin/${show._id}/reject`, {
       adminNotes: rejectReason
     })
 

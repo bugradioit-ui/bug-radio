@@ -1,27 +1,27 @@
 <template>
-  <DashboardLayout page-title="Le Mie Richieste Show">
+  <DashboardLayout page-title="My Show Requests">
     <template #topbar-actions>
       <Button
-        label="Nuova Richiesta"
-        icon="pi pi-plus"
-        @click="$router.push('/artist/request')"
+          label="New Request"
+          icon="pi pi-plus"
+          @click="$router.push('/artist/request')"
       />
     </template>
 
-    <!-- Welcome Message se non ha richieste -->
+    <!-- Welcome Message if no requests -->
     <Card class="welcome-card" v-if="artistStore.myRequests.length === 0">
       <template #content>
         <div class="empty-state-large">
           <i class="pi pi-microphone" style="font-size: 4rem; color: #cbd5e1;"></i>
-          <h2>Benvenuto su BUG Radio! 🎵</h2>
-          <p>Non hai ancora richiesto nessuno show.</p>
-          <p>Clicca il pulsante qui sotto per proporre il tuo programma!</p>
+          <h2>Welcome to BUG Radio! 🎵</h2>
+          <p>You haven't requested any shows yet.</p>
+          <p>Click the button below to submit your program!</p>
           <Button
-            label="Richiedi il Tuo Show"
-            icon="pi pi-plus"
-            size="large"
-            @click="$router.push('/artist/request')"
-            class="cta-button"
+              label="Request Your Show"
+              icon="pi pi-plus"
+              size="large"
+              @click="$router.push('/artist/request')"
+              class="cta-button"
           />
         </div>
       </template>
@@ -34,7 +34,7 @@
           <template #content>
             <div class="stat-content">
               <div class="stat-info">
-                <h3>Richieste Totali</h3>
+                <h3>Total Requests</h3>
                 <p>{{ artistStore.myRequests.length }}</p>
               </div>
               <i class="pi pi-list stat-icon"></i>
@@ -46,7 +46,7 @@
           <template #content>
             <div class="stat-content">
               <div class="stat-info">
-                <h3>In Attesa</h3>
+                <h3>Pending</h3>
                 <p>{{ artistStore.pendingCount }}</p>
               </div>
               <i class="pi pi-clock stat-icon"></i>
@@ -58,7 +58,7 @@
           <template #content>
             <div class="stat-content">
               <div class="stat-info">
-                <h3>Approvati</h3>
+                <h3>Approved</h3>
                 <p>{{ artistStore.approvedCount }}</p>
               </div>
               <i class="pi pi-check-circle stat-icon"></i>
@@ -70,7 +70,7 @@
           <template #content>
             <div class="stat-content">
               <div class="stat-info">
-                <h3>Rifiutati</h3>
+                <h3>Rejected</h3>
                 <p>{{ rejectedCount }}</p>
               </div>
               <i class="pi pi-times-circle stat-icon"></i>
@@ -79,14 +79,14 @@
         </Card>
       </div>
 
-      <!-- Info Box per show approvati -->
+      <!-- Info Box for approved shows -->
       <Message v-if="artistStore.approvedCount > 0" severity="success" :closable="false" class="info-message">
         <div class="message-content">
           <i class="pi pi-check-circle"></i>
           <div>
-            <strong>Congratulazioni!</strong> Hai {{ artistStore.approvedCount }} show {{ artistStore.approvedCount === 1 ? 'approvato' : 'approvati' }}.
+            <strong>Congratulations!</strong> You have {{ artistStore.approvedCount }} {{ artistStore.approvedCount === 1 ? 'approved show' : 'approved shows' }}.
             <br>
-            Gli episodi verranno gestiti e pubblicati dall'admin.
+            Episodes will be managed and published by the admin.
           </div>
         </div>
       </Message>
@@ -95,37 +95,37 @@
       <Card>
         <template #title>
           <div class="card-title-actions">
-            <span>I Miei Show</span>
+            <span>My Shows</span>
             <Button
-              label="Nuova Richiesta"
-              icon="pi pi-plus"
-              size="small"
-              @click="$router.push('/artist/request')"
+                label="New Request"
+                icon="pi pi-plus"
+                size="small"
+                @click="$router.push('/artist/request')"
             />
           </div>
         </template>
 
         <template #content>
           <DataTable
-            :value="artistStore.myRequests"
-            :loading="artistStore.loading"
-            paginator
-            :rows="10"
-            stripedRows
-            sortField="createdAt"
-            :sortOrder="-1"
+              :value="artistStore.myRequests"
+              :loading="artistStore.loading"
+              paginator
+              :rows="10"
+              stripedRows
+              sortField="createdAt"
+              :sortOrder="-1"
           >
-            <Column field="title" header="Titolo Show" sortable style="min-width: 200px;"></Column>
-            <Column field="artist.name" header="Nome Artista" sortable></Column>
-            <Column field="genres" header="Generi">
+            <Column field="title" header="Show Title" sortable style="min-width: 200px;"></Column>
+            <Column field="artist.name" header="Artist Name" sortable></Column>
+            <Column field="genres" header="Genres">
               <template #body="slotProps">
                 <div class="genres-tags">
                   <Tag
-                    v-for="genre in slotProps.data.genres?.slice(0, 2)"
-                    :key="genre"
-                    :value="genre"
-                    severity="info"
-                    class="genre-tag"
+                      v-for="genre in slotProps.data.genres?.slice(0, 2)"
+                      :key="genre"
+                      :value="genre"
+                      severity="info"
+                      class="genre-tag"
                   />
                   <span v-if="slotProps.data.genres?.length > 2" class="more-genres">
                     +{{ slotProps.data.genres.length - 2 }}
@@ -136,25 +136,25 @@
             <Column field="requestStatus" header="Status" sortable>
               <template #body="slotProps">
                 <Tag
-                  :value="getStatusLabel(slotProps.data.requestStatus)"
-                  :severity="getStatusSeverity(slotProps.data.requestStatus)"
+                    :value="getStatusLabel(slotProps.data.requestStatus)"
+                    :severity="getStatusSeverity(slotProps.data.requestStatus)"
                 />
               </template>
             </Column>
-            <Column field="createdAt" header="Data Richiesta" sortable>
+            <Column field="createdAt" header="Request Date" sortable>
               <template #body="slotProps">
                 {{ formatDate(slotProps.data.createdAt) }}
               </template>
             </Column>
-            <Column header="Azioni" style="width: 120px;">
+            <Column header="Actions" style="width: 120px;">
               <template #body="slotProps">
                 <Button
-                  icon="pi pi-eye"
-                  rounded
-                  outlined
-                  severity="info"
-                  @click="viewDetails(slotProps.data)"
-                  v-tooltip.top="'Dettagli'"
+                    icon="pi pi-eye"
+                    rounded
+                    outlined
+                    severity="info"
+                    @click="viewDetails(slotProps.data)"
+                    v-tooltip.top="'Details'"
                 />
               </template>
             </Column>
@@ -163,49 +163,49 @@
       </Card>
     </template>
 
-    <!-- Dialog Dettagli -->
+    <!-- Details Dialog -->
     <Dialog
-      v-model:visible="detailsVisible"
-      header="Dettagli Richiesta Show"
-      :modal="true"
-      :style="{ width: '700px' }"
-      :maximizable="true"
+        v-model:visible="detailsVisible"
+        header="Show Request Details"
+        :modal="true"
+        :style="{ width: '700px' }"
+        :maximizable="true"
     >
       <div class="details-content" v-if="selectedRequest">
         <!-- Status Badge -->
         <div class="status-banner" :class="'status-' + selectedRequest.requestStatus">
           <Tag
-            :value="getStatusLabel(selectedRequest.requestStatus)"
-            :severity="getStatusSeverity(selectedRequest.requestStatus)"
-            style="font-size: 1.1rem; padding: 0.5rem 1rem;"
+              :value="getStatusLabel(selectedRequest.requestStatus)"
+              :severity="getStatusSeverity(selectedRequest.requestStatus)"
+              style="font-size: 1.1rem; padding: 0.5rem 1rem;"
           />
         </div>
 
-        <!-- Immagine Show -->
+        <!-- Show Image -->
         <div class="detail-section" v-if="selectedRequest.image?.url">
-          <h3>📻 Immagine Show</h3>
+          <h3>📻 Show Image</h3>
           <div class="image-preview-detail">
             <img :src="selectedRequest.image.url" :alt="selectedRequest.title" />
           </div>
         </div>
 
-        <!-- Info Show -->
+        <!-- Show Info -->
         <div class="detail-section">
-          <h3>Informazioni Show</h3>
-          <p><strong>Titolo:</strong> {{ selectedRequest.title }}</p>
-          <p><strong>Descrizione:</strong></p>
+          <h3>Show Information</h3>
+          <p><strong>Title:</strong> {{ selectedRequest.title }}</p>
+          <p><strong>Description:</strong></p>
           <p class="description-text">{{ selectedRequest.description }}</p>
-          <p><strong>Generi:</strong> {{ selectedRequest.genres?.join(', ') }}</p>
+          <p><strong>Genres:</strong> {{ selectedRequest.genres?.join(', ') }}</p>
           <p v-if="selectedRequest.tags?.length"><strong>Tags:</strong> {{ selectedRequest.tags.join(', ') }}</p>
         </div>
 
-        <!-- Foto e Info Artista -->
+        <!-- Artist Photo and Info -->
         <div class="detail-section">
-          <h3>Artista</h3>
+          <h3>Artist</h3>
           <div v-if="selectedRequest.artist?.photo" style="margin-bottom: 1rem;">
             <img :src="selectedRequest.artist.photo" :alt="selectedRequest.artist.name" class="artist-photo" />
           </div>
-          <p><strong>Nome:</strong> {{ selectedRequest.artist.name }}</p>
+          <p><strong>Name:</strong> {{ selectedRequest.artist.name }}</p>
           <p><strong>Email:</strong> {{ selectedRequest.artist.email }}</p>
           <p><strong>Bio:</strong></p>
           <p class="description-text">{{ selectedRequest.artist.bio }}</p>
@@ -227,30 +227,30 @@
           </div>
         </div>
 
-        <!-- Programmazione -->
+        <!-- Schedule -->
         <div class="detail-section">
-          <h3>📅 Programmazione</h3>
-          <p><strong>Giorno:</strong> {{ selectedRequest.schedule.dayOfWeek }}</p>
-          <p><strong>Orario:</strong> {{ selectedRequest.schedule.timeSlot }}</p>
+          <h3>📅 Schedule</h3>
+          <p><strong>Day:</strong> {{ selectedRequest.schedule.dayOfWeek }}</p>
+          <p><strong>Time:</strong> {{ selectedRequest.schedule.timeSlot }}</p>
         </div>
 
-        <!-- Status e Note Admin -->
+        <!-- Status and Admin Notes -->
         <div class="detail-section" v-if="selectedRequest.requestStatus !== 'pending'">
-          <h3>💬 Risposta Admin</h3>
+          <h3>💬 Admin Response</h3>
           <p v-if="selectedRequest.adminNotes" class="admin-notes">{{ selectedRequest.adminNotes }}</p>
-          <p v-else class="no-notes">Nessuna nota dall'admin</p>
+          <p v-else class="no-notes">No notes from admin</p>
         </div>
 
-        <!-- Info Sistema -->
+        <!-- System Info -->
         <div class="detail-section">
           <h3>📊 Info</h3>
-          <p><strong>Data Richiesta:</strong> {{ formatDate(selectedRequest.createdAt) }}</p>
-          <p><strong>Ultimo Aggiornamento:</strong> {{ formatDate(selectedRequest.updatedAt) }}</p>
+          <p><strong>Request Date:</strong> {{ formatDate(selectedRequest.createdAt) }}</p>
+          <p><strong>Last Update:</strong> {{ formatDate(selectedRequest.updatedAt) }}</p>
         </div>
       </div>
 
       <template #footer>
-        <Button label="Chiudi" @click="detailsVisible = false" />
+        <Button label="Close" @click="detailsVisible = false" />
       </template>
     </Dialog>
 
@@ -270,15 +270,15 @@ const toast = useToast()
 const detailsVisible = ref(false)
 const selectedRequest = ref(null)
 
-const rejectedCount = computed(() => 
-  artistStore.myRequests.filter(r => r.requestStatus === 'rejected').length
+const rejectedCount = computed(() =>
+    artistStore.myRequests.filter(r => r.requestStatus === 'rejected').length
 )
 
 const getStatusLabel = (status) => {
   const map = {
-    pending: 'IN ATTESA',
-    approved: 'APPROVATO ✓',
-    rejected: 'RIFIUTATO'
+    pending: 'PENDING',
+    approved: 'APPROVED ✓',
+    rejected: 'REJECTED'
   }
   return map[status] || status
 }
@@ -294,7 +294,7 @@ const getStatusSeverity = (status) => {
 
 const formatDate = (date) => {
   if (!date) return '-'
-  return new Date(date).toLocaleDateString('it-IT', {
+  return new Date(date).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -319,8 +319,8 @@ onMounted(async () => {
   } catch (error) {
     toast.add({
       severity: 'error',
-      summary: 'Errore',
-      detail: 'Errore nel caricamento delle richieste',
+      summary: 'Error',
+      detail: 'Error loading requests',
       life: 3000
     })
   }
